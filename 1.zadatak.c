@@ -24,7 +24,7 @@ int main() {
 	student* s=NULL;
 	char* datoteka = NULL;
 
-	scanf(" %s", &datoteka);
+	scanf(" %s", datoteka);
 
 	FILE* f = NULL;
 	f = fopen(datoteka, "r");
