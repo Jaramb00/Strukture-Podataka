@@ -85,7 +85,8 @@ void ProcitajIzDatoteke(Pos P, char* ime_dat)
 		i--;
 
 	P->Exp = i;
-
+	
+	fclose(dat);
 }
 
 void Ispis(struct Polinom P)
