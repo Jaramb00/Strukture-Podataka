@@ -3,66 +3,58 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define MAX 10
+#define MaxDeg 10
 
-struct Polinom
+struct Polynomial;
+
+typedef struct Polynomial* Pol;
+
+struct Polynomial
 {
-	int Koeficijent[MAX + 1];
-	int Exp;
+	int Koeficijent;
+	int Exponent;
+	Pol Next;
 };
 
-typedef struct Polinom* Pos;
 
-void NultiPolinom(Pos Poly);
-void ProcitajIzDatoteke(Pos, char*);
-void Ispis(struct Polinom);
-void ZbrojiPolinome(Pos, Pos, Pos);
-void MnoziPolinome(Pos, Pos, Pos);
-
-int Max(int, int);
+void ProcitajPolinomeIzdatoteke(Pol, char*);
+void Ispis(Pol);
+void ZbrojiPolinome(Pol, Pol, Pol);
+void MnoziPolinome(Pol, Pol, Pol);
 
 
 void main()
 {
-	struct Polinom P1, P2, S, P;
+	struct Polynomial P1, P2, S, P;
 
-	NultiPolinom(&P1);
-	ProcitajIzDatoteke(&P1, "Polinom_1.txt");
-	Ispis(P1);
+	P1.Next = NULL;
+	P2.Next = NULL;
+	S.Next = NULL;
+	P.Next = NULL;
 
-	NultiPolinom(&P2);
-	ProcitajIzDatoteke(&P2, "Polinom_2.txt");
-	Ispis(P2);
+	ProcitajPolinomeIzdatoteke(&P1, "Polinom_1.txt");
+	Ispis(&P1);
+
+	ProcitajPolinomeIzdatoteke(&P2, "Polinom_2.txt");
+	Ispis(&P2);
 
 
-
-	NultiPolinom(&S);
-	ZbrojiPolinome(&P1, &P2, &S);
+	ZbrojiPolinome(P1.Next, P2.Next, &S);
 	printf("\n\nSuma je:");
-	Ispis(S);
+	Ispis(&S);
 
-	NultiPolinom(&P);
-	MnoziPolinome(&P1, &P2, &P);
+	MnoziPolinome(P1.Next, P2.Next, &P);
 	printf("\n\nProdukt je:");
-	Ispis(P);
+	Ispis(&P);
 
 	printf("\n");
 }
 
-void NultiPolinom(Pos Poly)
-{
-	int i;
 
-	for (i = 0; i <= MAX; i++)
-		Poly->Koeficijent[i] = 0;
-
-	Poly->Exp = 0;
-}
-
-void ProcitajIzDatoteke(Pos P, char* ime_dat)
+void ProcitajPolinomeIzdatoteke(Pol P, char* ime_dat)
 {
 	FILE* dat;
-	int i;
+	Pol q, temp, prev;
 
 	dat = fopen(ime_dat, "r");
 	if (NULL == dat)
@@ -72,69 +64,153 @@ void ProcitajIzDatoteke(Pos P, char* ime_dat)
 	}
 	else
 	{
-		i = 0;
-		while (i <= MAX && 0 == feof(dat))
+		while (0 == feof(dat))
 		{
-			fscanf(dat, " %d", &P->Koeficijent[i]);
-			i++;
+			q = (Pol)malloc(sizeof(struct Polynomial));
+
+			fscanf(dat, " %d %d", &q->Koeficijent, &q->Exponent);
+
+			temp = P->Next;
+			prev = P;
+			while (temp != NULL && temp->Exponent > q->Exponent)
+			{
+				prev = temp;
+				temp = temp->Next;
+			}
+
+			prev->Next = q;
+
+			if (temp != NULL)
+				q->Next = temp;
+			else
+				q->Next = NULL;
 		}
 	}
 
-	i = MAX;
-	while (P->Koeficijent[i] == 0 && i != 0)
-		i--;
 
-	P->Exp = i;
-	
-	fclose(dat);
 }
 
-void Ispis(struct Polinom P)
+void Ispis(Pol P)
 {
-	int i;
 
 	printf("\n");
 
-	for (i = P.Exp; i >= 0; i--)
-		if (P.Koeficijent[i] > 0)
-			printf("\t +%d*x^%d", P.Koeficijent[i], i);
-		else if (P.Koeficijent[i] < 0)
-			printf("\t %d*x^%d", P.Koeficijent[i], i);
+	P = P->Next;
+
+	while (P != NULL)
+	{
+		if (P->Koeficijent > 0)
+			printf("\t+%d*x^%d", P->Koeficijent, P->Exponent);
+		else
+			printf("\t%d*x^%d", P->Koeficijent, P->Exponent);
+		P = P->Next;
+	}
+
 
 	printf("\n");
-}
-
-void ZbrojiPolinome(Pos P1, Pos P2, Pos S)
-{
-	int i;
-
-	S->Exp = Max(P1->Exp, P2->Exp);
-
-	for (i = S->Exp; i >= 0; i--)
-		S->Koeficijent[i] = P1->Koeficijent[i] + P2->Koeficijent[i];
 
 }
 
-int Max(int x, int y)
+void ZbrojiPolinome(Pol P1, Pol P2, Pol S)
 {
-	if (x > y)
-		return x;
+	Pol q, temp;
+
+	while (P1 != NULL && P2 != NULL)
+	{
+		q = (Pol)malloc(sizeof(struct Polynomial));
+		q->Next = NULL;
+
+
+		if (P1->Exponent > P2->Exponent)
+		{
+			q->Exponent = P1->Exponent;
+			q->Koeficijent = P1->Koeficijent;
+			P1 = P1->Next;
+		}
+		else if (P1->Exponent < P2->Exponent)
+		{
+			q->Exponent = P2->Exponent;
+			q->Koeficijent = P2->Koeficijent;
+			P2 = P2->Next;
+		}
+		else  // P1->Exp == P2->Exp
+		{
+			q->Exponent = P1->Exponent;
+			q->Koeficijent = P1->Koeficijent + P2->Koeficijent;
+			P1 = P1->Next;
+			P2 = P2->Next;
+		}
+		S->Next = q;
+		S = q;
+	}
+
+	if (P1 != NULL)
+		temp = P1;
 	else
-		return y;
+		temp = P2;
+
+	while (temp != NULL)
+	{
+		q = (Pol)malloc(sizeof(struct Polynomial));
+		q->Next = NULL;
+		q->Exponent = temp->Exponent;
+		q->Koeficijent = temp->Koeficijent;
+		S->Next = q;
+		S = q;
+		temp = temp->Next;
+	}
 
 }
 
-void MnoziPolinome(Pos P1, Pos P2, Pos P)
+
+void MnoziPolinome(Pol P1, Pol P2, Pol P)
 {
-	int i, j;
+	Pol q, first = P1, second = P2, temp, prev;
+	int n;
 
-	P->Exp = P1->Exp + P2->Exp;
+	while (first != NULL)
+	{
+		second = P2;
+		while (second != NULL)
+		{
+			temp = P->Next;
+			prev = P;
 
-	if (P->Exp > MAX)
-		printf("Produkt je nemoguce izracunati zbog prevelike dimenzije!");
-	else
-		for (i = P1->Exp; i >= 0; i--)
-			for (j = P2->Exp; j >= 0; j--)
-				P->Koeficijent[i + j] = P->Koeficijent[i + j] + P1->Koeficijent[i] * P2->Koeficijent[j];
+			n = first->Exponent + second->Exponent;
+
+			while (temp != NULL && temp->Exponent > n)
+			{
+				prev = temp;
+				temp = temp->Next;
+			}
+
+			if (temp != NULL && temp->Exponent == n)
+				temp->Koeficijent += first->Koeficijent * second->Koeficijent;
+			else
+			{
+				q = (Pol)malloc(sizeof(struct Polynomial));
+
+				q->Exponent = n;
+				q->Koeficijent = first->Koeficijent * second->Koeficijent;
+
+				prev->Next = q;
+				q->Next = temp;
+			}
+
+			second = second->Next;
+		}
+		first = first->Next;
+	}
+
+	while (P->Next != NULL)
+	{
+		if (P->Next->Koeficijent == 0)
+		{
+			temp = P->Next;
+			P->Next = P->Next->Next;
+			free(temp);
+		}
+		P = P->Next;
+	}
 
 }
