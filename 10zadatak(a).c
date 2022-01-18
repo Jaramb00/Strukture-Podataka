@@ -234,7 +234,7 @@ Position NadiPoImeuDrzave(char *drzava, Position head)
 		current = current->next;
 	}
 	if (current == NULL) {
-		printf("Drzava %s nepostoji\n", drzava);
+		printf("Drzava %s ne postoji\n", drzava);
 	}
 	return NULL;
 }
