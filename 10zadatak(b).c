@@ -62,7 +62,7 @@ int main() {
 			printf("Gradovi sa vise od %d stanovnika:\n", minBrStanovnika);
 			PrintGradoviSaMinStan(current->head, minBrStanovnika);
 		}
-		printf("Za nastavak unesite bilo koju tipku, a za izlaz upišite exit\n");
+		printf("Za nastavak unesite bilo koju tipku, a za izlaz upisite exit\n");
 		InputString(Input);
 
 	} while (strcmp(Input, "exit") != 0);
